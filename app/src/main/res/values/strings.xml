@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Indoor Localisation</string>
+    <string name="tab_calibration">Calibration</string>
+    <string name="tab_positioning">Positioning</string>
+    <string name="tab_database">Database</string>
+    <string name="hint_location">Location label (e.g. Lobby, Desk A)</string>
+    <string name="label_waiting_for_scan">Waiting for a fresh Wi-Fi scan...</string>
+    <string name="button_scan_collect">Scan &amp; collect</string>
+    <string name="button_save_fingerprint">Save fingerprint</string>
+    <string name="button_predict_location">Start continuous prediction</string>
+    <string name="button_stop_prediction">Stop prediction</string>
+    <string name="label_prediction_unknown">Prediction: unknown</string>
+    <string name="button_refresh_db">Refresh database</string>
+    <string name="button_clear_db">Delete database</string>
+    <string name="permission_rationale">Wi-Fi scanning needs location permission.</string>
+    <string name="notification_channel">Localization</string>
+    <string name="notification_running">Localization engine running</string>
+    <string name="label_no_fingerprints">Database empty</string>
+</resources>
