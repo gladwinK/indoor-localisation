@@ -76,6 +76,43 @@
                         android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="@string/hint_x_meters">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/xInput"
+                            android:inputType="numberDecimal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="wrap_content" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="@string/hint_y_meters">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/yInput"
+                            android:inputType="numberDecimal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/freshnessLabel"
                     android:layout_width="match_parent"
@@ -114,25 +151,168 @@
                 android:visibility="gone"
                 android:layout_marginTop="12dp">
 
+                <Button
+                    android:id="@+id/toggleSettingsButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show Settings"
+                    android:layout_gravity="end" />
+
+                <LinearLayout
+                    android:id="@+id/ipConfigContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:hint="IP Address">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/ipInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="10.60.4.36"
+                            android:inputType="number|textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Space
+                        android:layout_width="8dp"
+                        android:layout_height="wrap_content" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Port">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/portInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="8081"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/predictionLabel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_prediction_unknown"
-            android:textAppearance="?attr/textAppearanceHeadline6" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/label_prediction_unknown"
+                    android:textSize="34sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/teal_700"
+                    android:gravity="center" />
 
-        <Button
-            android:id="@+id/predictButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/button_predict_location" />
+                <Button
+                    android:id="@+id/predictButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/button_predict_location" />
 
                 <TextView
                     android:id="@+id/predictionDetails"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <!-- PDR UI temporarily hidden -->
+                <!--
+                <TextView
+                    android:id="@+id/pdrStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/label_pdr_stopped"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <Button
+                        android:id="@+id/startPdrButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/button_start_pdr" />
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="wrap_content" />
+
+                    <Button
+                        android:id="@+id/resetPdrButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/button_reset_pdr" />
+                </LinearLayout>
+
+                <com.example.indoor_localisation_again.ui.PdrMapView
+                    android:id="@+id/pdrMap"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/white" />
+                -->
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/teal_700" />
+
+                <TextView
+                    android:id="@+id/voiceStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Voice assistant idle"
+                    android:textAppearance="?attr/textAppearanceBody2" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
+
+                    <Button
+                        android:id="@+id/recordButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Start recording" />
+
+                    <Space
+                        android:layout_width="12dp"
+                        android:layout_height="wrap_content" />
+
+                    <Button
+                        android:id="@+id/sendVoiceButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Send to Gemini" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/voiceResult"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text=""
                     android:textAppearance="?attr/textAppearanceBody2" />
             </LinearLayout>
 

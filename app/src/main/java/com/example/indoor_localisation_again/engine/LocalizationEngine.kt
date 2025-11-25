@@ -11,17 +11,25 @@ class LocalizationEngine(
 )
 {
     data class Prediction(
+        val fingerprintId: Long,
         val locationName: String,
         val score: Double,
         val matchedCount: Int
     )
 
-    suspend fun saveFingerprint(locationName: String, readings: List<AccessPointReading>) {
+    suspend fun saveFingerprint(
+        locationName: String,
+        readings: List<AccessPointReading>,
+        xMeters: Double? = null,
+        yMeters: Double? = null
+    ) {
         if (locationName.isBlank() || readings.isEmpty()) return
         val fingerprint = Fingerprint(
             locationName = locationName.trim(),
             timestamp = System.currentTimeMillis(),
-            readings = readings
+            readings = readings,
+            xMeters = xMeters,
+            yMeters = yMeters
         )
         repository.saveFingerprint(fingerprint)
     }
@@ -49,6 +57,7 @@ class LocalizationEngine(
             val normalized = totalDiff / matches
             if (best == null || normalized < best!!.score) {
                 best = Prediction(
+                    fingerprintId = fingerprint.id,
                     locationName = fingerprint.locationName,
                     score = normalized,
                     matchedCount = matches

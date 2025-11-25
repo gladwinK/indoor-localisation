@@ -4,5 +4,7 @@ data class Fingerprint(
     val id: Long = 0,
     val locationName: String,
     val timestamp: Long,
-    val readings: List<AccessPointReading>
+    val readings: List<AccessPointReading>,
+    val xMeters: Double? = null,
+    val yMeters: Double? = null
 )

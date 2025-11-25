@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [FingerprintEntity::class], version = 1, exportSchema = false)
+@Database(entities = [FingerprintEntity::class], version = 2, exportSchema = false)
 @TypeConverters(RoomAccessPointConverters::class)
 abstract class FingerprintDatabase : RoomDatabase() {
     abstract fun fingerprintDao(): FingerprintDao
@@ -21,8 +21,18 @@ abstract class FingerprintDatabase : RoomDatabase() {
                     context.applicationContext,
                     FingerprintDatabase::class.java,
                     "fingerprints.db"
-                ).build().also { instance = it }
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .build()
+                    .also { instance = it }
             }
+
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE fingerprints ADD COLUMN xMeters REAL")
+                database.execSQL("ALTER TABLE fingerprints ADD COLUMN yMeters REAL")
+            }
+        }
     }
 }
 

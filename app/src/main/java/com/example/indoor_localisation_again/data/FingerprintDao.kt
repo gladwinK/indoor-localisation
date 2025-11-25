@@ -14,6 +14,9 @@ interface FingerprintDao {
     @Query("SELECT * FROM fingerprints ORDER BY timestamp DESC")
     fun getAll(): Flow<List<FingerprintEntity>>
 
+    @Query("SELECT * FROM fingerprints WHERE id = :id")
+    suspend fun getById(id: Long): FingerprintEntity?
+
     @Query("DELETE FROM fingerprints")
     suspend fun clear()
 }

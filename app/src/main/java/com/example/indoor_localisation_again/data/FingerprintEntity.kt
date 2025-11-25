@@ -9,7 +9,9 @@ data class FingerprintEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val locationName: String,
     val timestamp: Long,
-    val readingsJson: String
+    val readingsJson: String,
+    val xMeters: Double?,
+    val yMeters: Double?
 )
 
 fun FingerprintEntity.toModel(): Fingerprint =
@@ -17,7 +19,9 @@ fun FingerprintEntity.toModel(): Fingerprint =
         id = id,
         locationName = locationName,
         timestamp = timestamp,
-        readings = AccessPointConverters.fromJson(readingsJson)
+        readings = AccessPointConverters.fromJson(readingsJson),
+        xMeters = xMeters,
+        yMeters = yMeters
     )
 
 fun Fingerprint.toEntity(): FingerprintEntity =
@@ -25,5 +29,7 @@ fun Fingerprint.toEntity(): FingerprintEntity =
         id = id,
         locationName = locationName,
         timestamp = timestamp,
-        readingsJson = AccessPointConverters.toJson(readings)
+        readingsJson = AccessPointConverters.toJson(readings),
+        xMeters = xMeters,
+        yMeters = yMeters
     )

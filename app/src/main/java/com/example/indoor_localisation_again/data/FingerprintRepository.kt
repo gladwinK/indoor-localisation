@@ -11,6 +11,9 @@ class FingerprintRepository(
     val fingerprints: Flow<List<Fingerprint>> =
         dao.getAll().map { list -> list.map { it.toModel() } }
 
+    suspend fun getFingerprint(id: Long): Fingerprint? =
+        dao.getById(id)?.toModel()
+
     suspend fun saveFingerprint(fingerprint: Fingerprint) {
         dao.insert(fingerprint.toEntity())
     }
