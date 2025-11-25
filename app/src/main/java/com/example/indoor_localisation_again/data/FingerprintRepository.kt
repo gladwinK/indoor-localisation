@@ -18,6 +18,10 @@ class FingerprintRepository(
         dao.insert(fingerprint.toEntity())
     }
 
+    suspend fun deleteFingerprint(id: Long) {
+        dao.deleteById(id)
+    }
+
     suspend fun clear() {
         dao.clear()
     }

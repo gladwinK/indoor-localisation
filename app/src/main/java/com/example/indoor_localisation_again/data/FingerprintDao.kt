@@ -17,6 +17,9 @@ interface FingerprintDao {
     @Query("SELECT * FROM fingerprints WHERE id = :id")
     suspend fun getById(id: Long): FingerprintEntity?
 
+    @Query("DELETE FROM fingerprints WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("DELETE FROM fingerprints")
     suspend fun clear()
 }

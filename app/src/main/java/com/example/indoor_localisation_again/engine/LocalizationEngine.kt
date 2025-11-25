@@ -3,13 +3,18 @@ package com.example.indoor_localisation_again.engine
 import com.example.indoor_localisation_again.data.FingerprintRepository
 import com.example.indoor_localisation_again.model.AccessPointReading
 import com.example.indoor_localisation_again.model.Fingerprint
+import com.example.indoor_localisation_again.model.Position
+import com.example.indoor_localisation_again.strategy.EuclideanStrategy
+import com.example.indoor_localisation_again.strategy.PositioningStrategy
+import com.example.indoor_localisation_again.strategy.WKNNStrategy
+import com.example.indoor_localisation_again.strategy.CosineSimilarityStrategy
 import kotlinx.coroutines.flow.first
-import kotlin.math.abs
 
 class LocalizationEngine(
     private val repository: FingerprintRepository
-)
-{
+) {
+    private var positioningStrategy: PositioningStrategy = EuclideanStrategy()
+
     data class Prediction(
         val fingerprintId: Long,
         val locationName: String,
@@ -48,7 +53,7 @@ class LocalizationEngine(
                 val current = currentByBssid[stored.bssid]
                 if (current != null) {
                     matches++
-                    totalDiff += abs(current.rssi - stored.rssi)
+                    totalDiff += kotlin.math.abs(current.rssi - stored.rssi)
                 } else {
                     totalDiff += MISSING_AP_PENALTY
                 }
@@ -65,6 +70,21 @@ class LocalizationEngine(
             }
         }
         return best
+    }
+
+    suspend fun updatePosition(wifiReadings: List<AccessPointReading>): Position? {
+        val database = repository.fingerprints.first()
+        if (wifiReadings.isEmpty() || database.isEmpty()) return null
+        return positioningStrategy.calculatePosition(wifiReadings, database)
+    }
+
+    fun setAlgorithm(algorithmName: String) {
+        positioningStrategy = when (algorithmName.uppercase()) {
+            "EUCLIDEAN" -> EuclideanStrategy()
+            "WKNN" -> WKNNStrategy()  // Uses default k=3
+            "COSINE" -> CosineSimilarityStrategy()
+            else -> EuclideanStrategy()  // Default fallback
+        }
     }
 
     companion object {

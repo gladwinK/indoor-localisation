@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var wifiScanner: WifiScanner
     private lateinit var repository: FingerprintRepository
     private lateinit var pdrEngine: PdrEngine
-    private val adapter = FingerprintAdapter()
+    private lateinit var adapter: FingerprintAdapter
 
     private var currentReadings: List<AccessPointReading> = emptyList()
     private var pendingAction: (() -> Unit)? = null
@@ -151,11 +151,22 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.predictButton).setOnClickListener { toggleContinuousPrediction() }
         findViewById<Button>(R.id.refreshDbButton).setOnClickListener { refreshDatabaseList() }
         findViewById<Button>(R.id.clearDbButton).setOnClickListener { clearDatabase() }
+
+        // Setup algorithm selection spinner
+        setupAlgorithmSpinner()
         // PDR controls temporarily disabled
         // findViewById<Button>(R.id.startPdrButton).setOnClickListener { togglePdr() }
         // findViewById<Button>(R.id.resetPdrButton).setOnClickListener { resetPdr() }
         findViewById<Button>(R.id.recordButton).setOnClickListener { toggleRecording() }
         findViewById<Button>(R.id.sendVoiceButton).setOnClickListener { sendVoiceToGemini() }
+
+        // Initialize adapter with delete callback
+        adapter = FingerprintAdapter { fingerprint ->
+            lifecycleScope.launch {
+                repository.deleteFingerprint(fingerprint.id)
+                Toast.makeText(this@MainActivity, "Fingerprint deleted: ${fingerprint.locationName}", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         val list = findViewById<RecyclerView>(R.id.fingerprintList)
         list.layoutManager = LinearLayoutManager(this)
@@ -188,6 +199,35 @@ class MainActivity : AppCompatActivity() {
                 btn.text = "Hide Settings"
             }
         }
+    }
+
+    private fun setupAlgorithmSpinner() {
+        val spinner = findViewById<android.widget.Spinner>(R.id.algorithmSpinner)
+        val algorithms = arrayOf("EUCLIDEAN", "WKNN", "COSINE")
+        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_item, algorithms)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        // Set default selection to EUCLIDEAN
+        spinner.setSelection(0)
+
+        spinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                val selectedAlgorithm = algorithms[position]
+                engine?.setAlgorithm(selectedAlgorithm)
+                Toast.makeText(this@MainActivity, "Algorithm changed to: $selectedAlgorithm", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {
+                // Do nothing
+            }
+        }
+    }
+
+    private fun getCurrentAlgorithm(): String {
+        // Get the current selection from the spinner
+        val spinner = findViewById<android.widget.Spinner>(R.id.algorithmSpinner)
+        return spinner.selectedItem?.toString() ?: "EUCLIDEAN"
     }
 
     private fun observeDatabase() {
@@ -298,6 +338,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // Update position using the selected algorithm
+        val positionResult = engine?.updatePosition(results)
+
         val prediction = engine?.predict(results)
         if (prediction == null) {
             findViewById<TextView>(R.id.predictionLabel).text = getString(R.string.label_prediction_unknown)
@@ -323,6 +366,49 @@ class MainActivity : AppCompatActivity() {
             }
             sendLiveLocation(prediction.locationName)
         }
+
+        // Update UI with the result from the selected algorithm if available
+        if (positionResult != null) {
+            // Display position result from selected algorithm
+            findViewById<TextView>(R.id.predictionLabel).text =
+                "Position: ${positionResult.locationName} (x:${"%.2f".format(positionResult.x)}, y:${"%.2f".format(positionResult.y)})"
+            findViewById<TextView>(R.id.predictionDetails).text =
+                "Algorithm: ${getCurrentAlgorithm()}, Confidence: ${"%.1f".format(positionResult.confidence)}%"
+            localizationService?.updateStatus("At ${positionResult.locationName} [${getCurrentAlgorithm()}]")
+
+            // Apply anchor from position result for PDR if coordinates are available
+            val anchor = if (positionResult.x != 0.0 || positionResult.y != 0.0) {
+                Point2D(positionResult.x, positionResult.y)
+            } else null
+            anchor?.let {
+                lastAnchor = currentAnchor
+                currentAnchor = it
+                pdrEngine.applyAnchor(it)
+            }
+
+            // Send live location with the algorithm result
+            sendLiveLocation(positionResult.locationName)
+        } else if (prediction != null) {
+            // Fallback to original prediction if position result is not available
+            val anchorFingerprint = repository.getFingerprint(prediction.fingerprintId)
+            findViewById<TextView>(R.id.predictionLabel).text =
+                "Prediction: ${prediction.locationName}"
+            findViewById<TextView>(R.id.predictionDetails).text =
+                "Score ${"%.1f".format(Locale.getDefault(), prediction.score)} with ${prediction.matchedCount} matching APs."
+            localizationService?.updateStatus("At ${prediction.locationName}")
+            val anchor = anchorFingerprint?.let {
+                if (it.xMeters != null && it.yMeters != null) {
+                    Point2D(it.xMeters, it.yMeters)
+                } else null
+            }
+            anchor?.let {
+                lastAnchor = currentAnchor
+                currentAnchor = it
+                pdrEngine.applyAnchor(it)
+            }
+            sendLiveLocation(prediction.locationName)
+        }
+
         updateCurrentScanDetails(results)
     }
 
